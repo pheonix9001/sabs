@@ -1,0 +1,21 @@
+#!/bin/sh
+
+debug=1
+
+if [[ $debug -eq 1 ]]
+then
+	source ./sabs.conf
+else
+	source /etc/sabs.conf
+fi
+
+abs_sudo() {
+	$SABS_SUDO $@
+}
+
+log() {
+	echo -e "\e[1;34m::\e[0m" $@
+}
+
+case $1 in
+esac
