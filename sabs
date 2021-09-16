@@ -1,15 +1,9 @@
 #!/bin/sh
 
-debug=1
+source ~/.config/sabs.conf
+cd ~/.abs-pkg
 
-if [[ $debug -eq 1 ]]
-then
-	source ./sabs.conf
-else
-	source /etc/sabs.conf
-fi
-
-abs_sudo() {
+abs_root() {
 	$SABS_SUDO $@
 }
 
@@ -17,5 +11,44 @@ log() {
 	echo -e "\e[1;34m::\e[0m" $@
 }
 
+usage() {
+	echo "Usage: sabs <build|ebd|ebb>"
+}
+
+gen_patch() {
+	backup=$(mktemp -d ~/.cache/abs-pkg/abs.XXXXXX)
+
+	touch $1
+	patch < $1
+	cp -R * $backup
+
+	log "Opening shell..."
+
+	export PS1="(sabs) $PS1"
+	bash
+
+	diff -r $backup . > "$1"
+	log "Generating patch..."
+
+	rm -rf $backup
+}
+
 case $1 in
+	"build")
+		log "Building $2..."
+		cd ~/.abs-pkg/$2
+
+		if [[ -z $1 ]]
+		then
+			echo "Usage: sabs build <package>"
+		fi
+
+		mkdir .sabs &> /dev/null
+		gen_patch .sabs/preinstall.patch
+
+		makepkg -os
+		;;
+	*)
+		usage
+		;;
 esac
