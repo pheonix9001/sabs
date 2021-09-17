@@ -19,15 +19,15 @@ gen_patch() {
 	backup=$(mktemp -d ~/.cache/abs-pkg/abs.XXXXXX)
 
 	touch $1
-	patch < $1
-	cp -R * $backup
+	patch -p < $1
+	cp -R git/* $backup
 
 	log "Opening shell..."
 
 	export PS1="(sabs) $PS1"
 	bash
 
-	diff -r $backup . > "$1"
+	diff -r $backup git > "$1"
 	log "Generating patch..."
 
 	rm -rf $backup
@@ -43,10 +43,21 @@ case $1 in
 			echo "Usage: sabs build <package>"
 		fi
 
-		mkdir .sabs &> /dev/null
-		gen_patch .sabs/preinstall.patch
-
+		pwd
+		cd git
 		makepkg -os
+		;;
+	"ebd")
+		log "Generating pre install patch"
+
+		mkdir sabs &> /dev/null
+		gen_patch sabs/predownload.patch
+		;;
+	"ebb")
+		log "Generating pre build patch"
+
+		mkdir sabs &> /dev/null
+		gen_patch sabs/prebuild.patch
 		;;
 	*)
 		usage
