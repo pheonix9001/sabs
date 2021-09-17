@@ -15,25 +15,54 @@ usage() {
 	echo "Usage: sabs <build|ebd|ebb>"
 }
 
+dopatch() {
+	touch $1
+	patch < $1
+}
+
 gen_patch() {
 	backup=$(mktemp -d ~/.cache/abs-pkg/abs.XXXXXX)
 
-	touch $1
-	patch -p < $1
-	cp -R git/* $backup
+	dopatch $1
+	cp -R * $backup
 
 	log "Opening shell..."
 
 	export PS1="(sabs) $PS1"
 	bash
 
-	diff -r $backup git > "$1"
+	diff -r $backup . > "$1"
 	log "Generating patch..."
 
 	rm -rf $backup
 }
 
+init_build() {
+	cp -R sabs/orig-src src
+	cd src
+}
+
+start_build() {
+	dopatch ../sabs/predownload.patch
+	makepkg -os
+}
+
+do_build() {
+	dopatch ../sabs/prebuild.patch
+	makepkg -i
+}
+
+cleanup_build() {
+	cd ..
+	rm -rf src
+}
+
 case $1 in
+	"install")
+		log "Downloading from $2"
+
+		git clone $2 sabs/orig-src
+		;;
 	"build")
 		log "Building $2..."
 		cd ~/.abs-pkg/$2
@@ -43,21 +72,27 @@ case $1 in
 			echo "Usage: sabs build <package>"
 		fi
 
-		pwd
-		cd git
-		makepkg -os
+		init_build
+		start_build
+		do_build
+		cleanup_build
 		;;
 	"ebd")
 		log "Generating pre install patch"
+		cd ~/.abs-pkg/$2
 
-		mkdir sabs &> /dev/null
-		gen_patch sabs/predownload.patch
+		init_build
+		gen_patch ../sabs/predownload.patch
+		cleanup_build
 		;;
 	"ebb")
 		log "Generating pre build patch"
+		cd ~/.abs-pkg/$2
 
-		mkdir sabs &> /dev/null
-		gen_patch sabs/prebuild.patch
+		init_build
+		start_build
+		gen_patch ../sabs/prebuild.patch
+		cleanup_build
 		;;
 	*)
 		usage
