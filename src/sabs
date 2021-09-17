@@ -15,46 +15,36 @@ usage() {
 	echo "Usage: sabs <build|ebd|ebb>"
 }
 
-dopatch() {
-	touch $1
-	patch < $1
-}
-
 gen_patch() {
-	backup=$(mktemp -d ~/.cache/abs-pkg/abs.XXXXXX)
-
 	patch < $1
-	cp -R * $backup
 
 	log "Opening shell..."
 
 	export PS1="(sabs) $PS1"
 	bash
 
-	diff -r $backup . > "$1"
+	diff -r orig-src . > "$1"
 	log "Generating patch..."
-
-	rm -rf $backup
 }
 
 init_build() {
 	log "Initializing build"
 
-	cp -R sabs/orig-src src
+	cp -R orig-src src
 	cd src
 }
 
 download_sources() {
 	log "Downloading sources"
 
-	patch < ../sabs/predownload.patch
+	patch < ../predownload.patch
 	makepkg -o
 }
 
 do_build() {
 	log "Started actual build"
 
-	patch < ../sabs/prebuild.patch
+	patch < ../prebuild.patch
 	makepkg -si
 }
 
@@ -66,19 +56,6 @@ cleanup_build() {
 }
 
 case $1 in
-	"install")
-		dir=$(basename $2 .git)
-		log "Downloading from $2 to $dir"
-		mkdir $dir &> /dev/null
-		cd ~/.abs-pkg/$dir
-
-		mkdir sabs &> /dev/null
-
-		git clone $2 sabs/orig-src
-		touch sabs/predownload.patch
-		touch sabs/prebuild.patch
-		echo $2 > sabs/git-src
-		;;
 	"build")
 		log "Building $2..."
 		cd ~/.abs-pkg/$2
@@ -97,7 +74,7 @@ case $1 in
 		cd ~/.abs-pkg/$2
 
 		init_build # do not build or install dependencies
-		gen_patch ../sabs/predownload.patch
+		gen_patch ../predownload.patch
 		log "Downloading sources"
 		makepkg -o
 		do_build
@@ -109,7 +86,7 @@ case $1 in
 
 		init_build
 		download_sources # do not build, just install sources and dependencies
-		gen_patch ../sabs/prebuild.patch
+		gen_patch ../prebuild.patch
 
 		log "Started actual build"
 		makepkg -si

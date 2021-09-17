@@ -1,0 +1,31 @@
+#!/bin/sh
+
+log() {
+	echo -e "\e[1;34m::\e[0m" $@
+}
+
+usage() {
+	echo "Usage: sabs-git (install) <url>" 1>&2
+}
+
+if [[ -z $1 ]]
+then
+	usage
+	exit
+fi
+
+case $1 in
+	"download")
+		dir=$(basename $2 .git)
+		log "Downloading from $2 to $dir"
+		mkdir ~/.abs-pkg/$dir &> /dev/null
+		cd ~/.abs-pkg/$dir
+
+		mkdir abs &> /dev/null
+
+		git clone $2 orig-src
+		touch predownload.patch
+		touch prebuild.patch
+		echo $2 > git-src
+		;;
+esac

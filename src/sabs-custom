@@ -1,0 +1,6 @@
+#!/bin/sh
+
+touch predownload.patch
+touch prebuild.patch
+touch update
+chmod +x update
