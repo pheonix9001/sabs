@@ -23,7 +23,7 @@ dopatch() {
 gen_patch() {
 	backup=$(mktemp -d ~/.cache/abs-pkg/abs.XXXXXX)
 
-	dopatch $1
+	patch < $1
 	cp -R * $backup
 
 	log "Opening shell..."
@@ -38,30 +38,46 @@ gen_patch() {
 }
 
 init_build() {
+	log "Initializing build"
+
 	cp -R sabs/orig-src src
 	cd src
 }
 
-start_build() {
-	dopatch ../sabs/predownload.patch
-	makepkg -os
+download_sources() {
+	log "Downloading sources"
+
+	patch < ../sabs/predownload.patch
+	makepkg -o
 }
 
 do_build() {
-	dopatch ../sabs/prebuild.patch
-	makepkg -i
+	log "Started actual build"
+
+	patch < ../sabs/prebuild.patch
+	makepkg -si
 }
 
 cleanup_build() {
+	log "Started cleanup after build"
+
 	cd ..
 	rm -rf src
 }
 
 case $1 in
 	"install")
-		log "Downloading from $2"
+		dir=$(basename $2 .git)
+		log "Downloading from $2 to $dir"
+		mkdir $dir &> /dev/null
+		cd ~/.abs-pkg/$dir
+
+		mkdir sabs &> /dev/null
 
 		git clone $2 sabs/orig-src
+		touch sabs/predownload.patch
+		touch sabs/prebuild.patch
+		echo $2 > sabs/git-src
 		;;
 	"build")
 		log "Building $2..."
@@ -69,29 +85,35 @@ case $1 in
 
 		if [[ -z $1 ]]
 		then
-			echo "Usage: sabs build <package>"
-		fi
+			echo "Usage: sabs build <package>"; fi
 
 		init_build
-		start_build
+		download_sources
 		do_build
 		cleanup_build
 		;;
 	"ebd")
-		log "Generating pre install patch"
+		log "Generating pre-download patch"
 		cd ~/.abs-pkg/$2
 
-		init_build
+		init_build # do not build or install dependencies
 		gen_patch ../sabs/predownload.patch
+		log "Downloading sources"
+		makepkg -o
+		do_build
 		cleanup_build
 		;;
 	"ebb")
-		log "Generating pre build patch"
+		log "Generating pre-build patch"
 		cd ~/.abs-pkg/$2
 
 		init_build
-		start_build
+		download_sources # do not build, just install sources and dependencies
 		gen_patch ../sabs/prebuild.patch
+
+		log "Started actual build"
+		makepkg -si
+
 		cleanup_build
 		;;
 	*)
