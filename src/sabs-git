@@ -5,27 +5,30 @@ log() {
 }
 
 usage() {
-	echo "Usage: sabs-git (install) <url>" 1>&2
+	echo "Usage: sabs-git <url>" 1>&2
 }
 
-if [[ -z $1 ]]
+dir=$(basename $1 .git)
+log "Downloading from $1 to $dir"
+mkdir ~/.abs-pkg/$dir &> /dev/null
+cd ~/.abs-pkg/$dir
+
+git clone $1 orig-src
+touch predownload.patch
+touch prebuild.patch
+
+echo -e "#!/bin/sh
+cd orig-src
+
+remote=\$(git rev-parse origin/HEAD)
+current=\$(git rev-parse HEAD)
+
+if [[ \"\$remote\" == \"\$current\" ]]
 then
-	usage
-	exit
+	exit 255
 fi
-
-case $1 in
-	"download")
-		dir=$(basename $2 .git)
-		log "Downloading from $2 to $dir"
-		mkdir ~/.abs-pkg/$dir &> /dev/null
-		cd ~/.abs-pkg/$dir
-
-		mkdir abs &> /dev/null
-
-		git clone $2 orig-src
-		touch predownload.patch
-		touch prebuild.patch
-		echo $2 > git-src
-		;;
-esac
+echo -e '-- Updating $dir'
+git pull origin
+exit 0
+" > update
+chmod u+x update

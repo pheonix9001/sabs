@@ -13,12 +13,15 @@ log() {
 
 usage() {
 	echo "Usage: sabs <build|ebd|ebb>"
+	exit 255
 }
 
 gen_patch() {
 	patch < $1
 
 	log "Opening shell..."
+	echo "The patch is automatically generated when you close this shell."
+	echo "Use this shell to modify the package files"
 
 	export PS1="(sabs) $PS1"
 	bash
@@ -38,7 +41,7 @@ download_sources() {
 	log "Downloading sources"
 
 	patch < ../predownload.patch
-	makepkg -o
+	makepkg -so
 }
 
 do_build() {
@@ -55,19 +58,58 @@ cleanup_build() {
 	rm -rf src
 }
 
+update() {
+	cd ~/.abs-pkg/$1
+
+	./update
+}
+
+full_build() {
+	init_build
+	download_sources
+	do_build
+	cleanup_build
+}
+
 case $1 in
+	"update")
+		if [[ -z $2 ]]
+		then
+			log "Updating all packages"
+
+			for dir in $(ls -1 ~/.abs-pkg/)
+			do
+
+				if update $dir
+				then
+					cd ~/.abs-pkg/$dir
+					full_build
+				fi
+
+			done
+		else
+
+			log "Updating $2"
+			if update $2
+			then
+				cd ~/.abs-pkg/$2
+				pwd
+				full_build
+			fi
+
+		fi
+		;;
 	"build")
 		log "Building $2..."
 		cd ~/.abs-pkg/$2
 
-		if [[ -z $1 ]]
+		if [[ -z $2 ]]
 		then
-			echo "Usage: sabs build <package>"; fi
+			echo "Usage: sabs build <package>"
+			exit 255
+		fi
 
-		init_build
-		download_sources
-		do_build
-		cleanup_build
+		full_build
 		;;
 	"ebd")
 		log "Generating pre-download patch"
@@ -76,7 +118,7 @@ case $1 in
 		init_build # do not build or install dependencies
 		gen_patch ../predownload.patch
 		log "Downloading sources"
-		makepkg -o
+		makepkg -so
 		do_build
 		cleanup_build
 		;;

@@ -3,4 +3,4 @@
 touch predownload.patch
 touch prebuild.patch
 touch update
-chmod +x update
+chmod u+x update
