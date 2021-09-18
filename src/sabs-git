@@ -17,6 +17,13 @@ git clone $1 orig-src
 touch predownload.patch
 touch prebuild.patch
 
+if [[ -z $2 ]]
+then
+	echo "PKGBUILD" > pkgbuild.path
+else
+	echo "$2" > pkgbuild.path
+fi
+
 echo -e "#!/bin/sh
 cd orig-src
 

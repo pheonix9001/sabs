@@ -41,14 +41,14 @@ download_sources() {
 	log "Downloading sources"
 
 	patch < ../predownload.patch
-	makepkg -so
+	makepkg -so -p $(cat ../pkgbuild.path)
 }
 
 do_build() {
 	log "Started actual build"
 
 	patch < ../prebuild.patch
-	makepkg -si
+	makepkg -si -p $(cat ../pkgbuild.path)
 }
 
 cleanup_build() {
@@ -117,7 +117,7 @@ case $1 in
 		init_build # do not build or install dependencies
 		gen_patch ../predownload.patch
 		log "Downloading sources"
-		makepkg -so
+		makepkg -so -p $(cat ../pkgbuild.path)
 		do_build
 		cleanup_build
 		;;
@@ -130,7 +130,7 @@ case $1 in
 		gen_patch ../prebuild.patch
 
 		log "Started actual build"
-		makepkg -si
+		makepkg -si -p $(cat ../pkgbuild.path)
 
 		cleanup_build
 		;;
