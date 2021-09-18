@@ -26,7 +26,7 @@ gen_patch() {
 	export PS1="(sabs) $PS1"
 	bash
 
-	diff -r orig-src . > "$1"
+	diff -r ../orig-src . > "$1"
 	log "Generating patch..."
 }
 
@@ -88,12 +88,11 @@ case $1 in
 
 			done
 		else
-
 			log "Updating $2"
+
 			if update $2
 			then
 				cd ~/.abs-pkg/$2
-				pwd
 				full_build
 			fi
 
