@@ -2,5 +2,6 @@
 
 touch predownload.patch
 touch prebuild.patch
+echo "PKGBUILD" > pkgbuild.path
 touch update
 chmod u+x update

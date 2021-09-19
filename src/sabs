@@ -12,7 +12,7 @@ log() {
 }
 
 usage() {
-	echo "Usage: sabs <build|ebd|ebb>"
+	echo "Usage:" $@
 	exit 255
 }
 
@@ -98,21 +98,22 @@ case $1 in
 
 		fi
 		;;
+
 	"build")
 		log "Building $2..."
-		cd ~/.abs-pkg/$2
+		[[ ! -d ~/.abs-pkg/$2 ]] && usage "sabs build <package>"
 
-		if [[ -z $2 ]]
-		then
-			echo "Usage: sabs build <package>"
-			exit 255
-		fi
+		cd ~/.abs-pkg/$2
 
 		full_build
 		;;
+
 	"ebd")
 		log "Generating pre-download patch"
+		[[ ! -d ~/.abs-pkg/$2 ]] && usage "sabs ebd <package>"
+
 		cd ~/.abs-pkg/$2
+
 
 		init_build # do not build or install dependencies
 		gen_patch ../predownload.patch
@@ -121,8 +122,10 @@ case $1 in
 		do_build
 		cleanup_build
 		;;
+
 	"ebb")
 		log "Generating pre-build patch"
+		[[ ! -d ~/.abs-pkg/$2 ]] && usage "sabs ebb <package>"
 		cd ~/.abs-pkg/$2
 
 		init_build
@@ -135,6 +138,6 @@ case $1 in
 		cleanup_build
 		;;
 	*)
-		usage
+		usage "sabs (build|ebd|ebb)"
 		;;
 esac
