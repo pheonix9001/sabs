@@ -42,7 +42,7 @@ now it should be fine
 error: no operation specified (use -h for help)
 ```
 
-Great but baph has one issue. it depends on `sudo`. and I run `doas` based system. it would be nice if you could patch baph to remove `sudo`. Run
+Great but baph has one issue. it depends on `sudo`. and I run a `doas` based system. it would be nice if you could patch baph to remove `sudo`. Run
 
 ```
  ~>
@@ -74,7 +74,7 @@ In order to do that, use `ebb`('edit before build'). This will take a bit longer
  PKGBUILD  baph      src
 ```
 
-Now you can edit the files under `src/`. close the shell after this. it should now rebuild baph properly
+Now you can edit the files under `src/` and close the shell. it should now rebuild baph properly
 
 ```
  ~>
@@ -83,7 +83,7 @@ doas (asdf@desktop) password:
 ...
 ```
 
-Perfect! but this is where it gets even cooler, if you then rebuilt baph(`sabs build baph`) or updated baph(`sabs update baph`) it will automatically reapply
+Perfect! but this is where it gets even cooler, if you then rebuild baph(`sabs build baph`) or update baph(`sabs update baph`) it will automatically reapply
 all your changes. If you then do `sabs ebb baph` again for some reason, SABS will take you exactly where you left off so you dont have to redo `s/sudo/doas/`.
 This means you can use SABS to keep track of your suckless projects with ease.
 
