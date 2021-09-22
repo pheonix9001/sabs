@@ -53,7 +53,7 @@ patch: **** Only garbage was found in the patch input.
 :: Opening shell...
 The patch is automatically generated when you close this shell.
 Use this shell to modify the package files
- ~/.abs-pkg/baph/src>
+ ~/.local/abs-pkg/baph/src>
  λ ls
  PKGBUILD
 ```
@@ -69,7 +69,7 @@ But you also have to edit the source code.
 In order to do that, use `ebb`('edit before build'). This will take a bit longer but it should give you a similliar shell.
 
 ```
- ~/.abs-pkg/baph/src>
+ ~/.local/abs-pkg/baph/src>
  λ ls
  PKGBUILD  baph      src
 ```

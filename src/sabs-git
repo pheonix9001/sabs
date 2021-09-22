@@ -6,23 +6,38 @@ log() {
 
 usage() {
 	echo "Usage: sabs-git <url>" 1>&2
+	exit 255
 }
+
+[[ -z $1 ]] && usage
+
+pkgbuildpath="PKGBUILD"
+
+while getopts ":hp:" opt
+do
+	case "$opt" in
+		h)
+			usage
+			;;
+		p)
+			pkgbuildpath="$OPTARG"
+			;;
+		*)
+			usage
+			;;
+	esac
+done
+
+shift $((OPTIND - 1))
 
 dir=$(basename $1 .git)
 log "Downloading from $1 to $dir"
-mkdir ~/.abs-pkg/$dir &> /dev/null
-cd ~/.abs-pkg/$dir
+mkdir ~/.local/abs-pkg/$dir &> /dev/null
+cd ~/.local/abs-pkg/$dir
 
 git clone $1 orig-src
 touch predownload.patch
 touch prebuild.patch
-
-if [[ -z $2 ]]
-then
-	echo "PKGBUILD" > pkgbuild.path
-else
-	echo "$2" > pkgbuild.path
-fi
 
 echo -e "#!/bin/sh
 cd orig-src
@@ -39,3 +54,5 @@ git pull origin
 exit 0
 " > update
 chmod u+x update
+
+echo "$pkgbuildpath" > pkgbuild.path

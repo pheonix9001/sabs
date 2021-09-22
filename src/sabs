@@ -1,7 +1,7 @@
 #!/bin/sh
 
 source ~/.config/sabs.conf
-cd ~/.abs-pkg
+cd ~/.local/abs-pkg
 
 abs_root() {
 	$SABS_SUDO $@
@@ -59,7 +59,7 @@ cleanup_build() {
 }
 
 update() {
-	cd ~/.abs-pkg/$1
+	cd ~/.local/abs-pkg/$1
 
 	./update
 }
@@ -77,12 +77,12 @@ case $1 in
 		then
 			log "Updating all packages"
 
-			for dir in $(ls -1 ~/.abs-pkg/)
+			for dir in $(ls -1 ~/.local/abs-pkg/)
 			do
 
 				if update $dir
 				then
-					cd ~/.abs-pkg/$dir
+					cd ~/.local/abs-pkg/$dir
 					full_build
 				fi
 
@@ -92,7 +92,7 @@ case $1 in
 
 			if update $2
 			then
-				cd ~/.abs-pkg/$2
+				cd ~/.local/abs-pkg/$2
 				full_build
 			fi
 
@@ -101,18 +101,18 @@ case $1 in
 
 	"build")
 		log "Building $2..."
-		[[ ! -d ~/.abs-pkg/$2 ]] && usage "sabs build <package>"
+		[[ ! -d ~/.local/abs-pkg/$2 ]] && usage "sabs build <package>"
 
-		cd ~/.abs-pkg/$2
+		cd ~/.local/abs-pkg/$2
 
 		full_build
 		;;
 
 	"ebd")
 		log "Generating pre-download patch"
-		[[ ! -d ~/.abs-pkg/$2 ]] && usage "sabs ebd <package>"
+		[[ ! -d ~/.local/abs-pkg/$2 ]] && usage "sabs ebd <package>"
 
-		cd ~/.abs-pkg/$2
+		cd ~/.local/abs-pkg/$2
 
 
 		init_build # do not build or install dependencies
@@ -125,8 +125,8 @@ case $1 in
 
 	"ebb")
 		log "Generating pre-build patch"
-		[[ ! -d ~/.abs-pkg/$2 ]] && usage "sabs ebb <package>"
-		cd ~/.abs-pkg/$2
+		[[ ! -d ~/.local/abs-pkg/$2 ]] && usage "sabs ebb <package>"
+		cd ~/.local/abs-pkg/$2
 
 		init_build
 		download_sources # do not build, just install sources and dependencies
