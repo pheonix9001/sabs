@@ -8,14 +8,23 @@ file which can then be used with `pacman -U` to install the package.
 
 SABS is a framework on top of ABS to make it easy to update, patch, and maintain PKGBUILD file ans source files.
 
-# Quick start
-Install SABS
+# Installation
+
+## Manual
 ``` bash
 git clone https://github.com/pheonix9001/sabs.git
-[doas|sudo] ./install
+makepkg -si
+```
+
+## Post install
+now install SABS as a SABS package
+```
+sabs-git https://github.com/pheonix9001/sabs.git
 ```
 
 Edit ~/.config/sabs.conf
+
+# Quick start
 
 now lets install a package. atm you can only install custom and git packages. so
 ``` bash
