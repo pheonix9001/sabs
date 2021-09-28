@@ -16,17 +16,22 @@ usage() {
 	exit 255
 }
 
-gen_patch() {
-	patch < $1
+dopatch() {
+	log "Patching $1"
+	patch -p1 --merge < "$1"
+}
 
+gen_patch() {
 	log "Opening shell..."
 	echo "The patch is automatically generated when you close this shell."
 	echo "Use this shell to modify the package files"
 
 	export PS1="(sabs) $PS1"
+	dopatch "$2"
+
 	bash
 
-	diff -r ../orig-src . > "$1"
+	diff -r "$1" . > "$2"
 	log "Generating patch..."
 }
 
@@ -40,15 +45,15 @@ init_build() {
 download_sources() {
 	log "Downloading sources"
 
-	patch < ../predownload.patch
+	dopatch ../predownload.patch
 	makepkg -so -p $(cat ../pkgbuild.path)
 }
 
 do_build() {
 	log "Started actual build"
 
-	patch < ../prebuild.patch
-	makepkg -si -p $(cat ../pkgbuild.path)
+	dopatch ../prebuild.patch
+	makepkg -esi -p $(cat ../pkgbuild.path)
 }
 
 cleanup_build() {
@@ -114,11 +119,12 @@ case $1 in
 
 		cd ~/.local/abs-pkg/$2
 
+		init_build
+		gen_patch ../orig-src ../predownload.patch
 
-		init_build # do not build or install dependencies
-		gen_patch ../predownload.patch
 		log "Downloading sources"
 		makepkg -so -p $(cat ../pkgbuild.path)
+
 		do_build
 		cleanup_build
 		;;
@@ -130,13 +136,18 @@ case $1 in
 
 		init_build
 		download_sources # do not build, just install sources and dependencies
-		gen_patch ../prebuild.patch
+		tmp=$(mktemp -d /tmp/abs-pkgXXXXXXX)
+		cp -R . "$tmp"
+
+		gen_patch "$tmp" ../prebuild.patch
 
 		log "Started actual build"
-		makepkg -si -p $(cat ../pkgbuild.path)
+		makepkg -esi -p $(cat ../pkgbuild.path)
 
+		rm -rf "$tmp"
 		cleanup_build
 		;;
+
 	*)
 		usage "sabs (build|ebd|ebb)"
 		;;
