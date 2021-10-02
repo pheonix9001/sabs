@@ -3,10 +3,6 @@
 source ~/.config/sabs.conf
 cd ~/.local/abs-pkg
 
-abs_root() {
-	$SABS_SUDO $@
-}
-
 log() {
 	echo -e "\e[1;34m::\e[0m" $@
 }
@@ -63,12 +59,6 @@ cleanup_build() {
 	rm -rf src
 }
 
-update() {
-	cd ~/.local/abs-pkg/$1
-
-	./update
-}
-
 full_build() {
 	init_build
 	download_sources
@@ -84,10 +74,10 @@ case $1 in
 
 			for dir in $(ls -1 ~/.local/abs-pkg/)
 			do
-
-				if update $dir
+				cd ~/.local/abs-pkg/$dir
+				./update
+				if [[ $? == 0 ]]
 				then
-					cd ~/.local/abs-pkg/$dir
 					full_build
 				fi
 
@@ -95,12 +85,12 @@ case $1 in
 		else
 			log "Updating $2"
 
-			if update $2
+			cd ~/.local/abs-pkg/$2
+			./update
+			if [[ $? == 0 ]]
 			then
-				cd ~/.local/abs-pkg/$2
 				full_build
 			fi
-
 		fi
 		;;
 

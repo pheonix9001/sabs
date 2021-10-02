@@ -1,0 +1,23 @@
+#!/bin/sh
+
+AUR="https://aur.archlinux.org"
+
+search() {
+	url="$AUR/rpc/?type=search&by=name-desc&arg=$1"
+
+	# jq -r '.results[] | (" " + .Name, .Description)'
+	curl -s "$url" | jq -c ".results[]" | \
+ 	while read pack
+	do
+		name=$(echo "$pack" | jq -r ".Name")
+		echo $name
+	done
+}
+
+case "$1"
+	in
+	"search")
+	shift 1
+	search "$@"
+	;;
+esac

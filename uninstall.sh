@@ -1,4 +1,5 @@
 #!/bin/sh
 
 rm /bin/sabs
-rm /bin/sabs_build-pkg
+rm /bin/sabs-git
+rm /bin/sabs-custom
