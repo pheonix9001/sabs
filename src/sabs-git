@@ -42,6 +42,7 @@ touch prebuild.patch
 echo -e "#!/bin/sh
 cd orig-src
 
+git remote update
 remote=\$(git rev-parse origin/HEAD)
 current=\$(git rev-parse HEAD)
 
