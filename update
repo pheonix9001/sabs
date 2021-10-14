@@ -1,0 +1,15 @@
+#!/bin/sh
+	cd orig-src
+
+	git remote update
+	remote=$(git rev-parse origin/HEAD)
+	current=$(git rev-parse HEAD)
+
+	if [[ "$remote" == "$current" ]]
+	then
+		exit 255
+	fi
+	echo -e '-- Updating '
+	git pull origin
+	exit 0
+	
