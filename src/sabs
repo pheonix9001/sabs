@@ -74,6 +74,8 @@ case $1 in
 
 			for dir in $(ls -1 ~/.local/abs-pkg/)
 			do
+				log "Updating $dir"
+
 				cd ~/.local/abs-pkg/$dir
 				./update
 				if [[ $? == 0 ]]

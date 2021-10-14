@@ -6,18 +6,29 @@ search() {
 	url="$AUR/rpc/?type=search&by=name-desc&arg=$1"
 
 	# jq -r '.results[] | (" " + .Name, .Description)'
-	curl -s "$url" | jq -c ".results[]" | \
- 	while read pack
-	do
-		name=$(echo "$pack" | jq -r ".Name")
-		echo $name
-	done
+	curl -s "$url" | jq -rcM\
+		'.results[] | ("[1;33m" + .Name +
+			" [32m" + .Version + "[0m",
+		"    " + .Description)'
 }
 
-case "$1"
-	in
-	"search")
-	shift 1
-	search "$@"
-	;;
-esac
+install() {
+}
+
+while getopts ":s:" arg
+do
+	case "$arg" in
+		"s")
+			search "$OPTARG"
+			;;
+		"i")
+			install "$OPTARG"
+			;;
+		":")
+			echo "-${OPTARG} expects an argument"
+			;;
+		"?")
+			echo "Invalid option -${OPTARG}"
+			;;
+	esac
+done
